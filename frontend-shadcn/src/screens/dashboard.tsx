@@ -44,7 +44,7 @@ export function Dashboard() {
   
   const [currentUserMsg, setCurrentUserMsg] = useState("hello");
   const [currentAIMsg, setCurrentAIMsg] = useState("");
-  const [questionType, setQuestionType] = useState("");
+  const [questionType, setQuestionType] = useState("answer");
   const [chatHistory, setChatHistory] = useState<Chat[]>([{user:"ai", msg: "Hello, how can I help you?"},{user:"human", msg: "Hello, how can I help you?"}]);
   
   const [isLoading, setIsLoading] = useState(false);
@@ -54,13 +54,15 @@ export function Dashboard() {
     setIsLoading(true);
     try {
       console.log("questionType", questionType);
+      console.log("questionType", questionType);
+      console.log("currentUserMsg", currentUserMsg);
       
       const response = await fetch(`http://localhost:8080/${questionType}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ currentUserMsg })
+        body: JSON.stringify({ input: currentUserMsg })
       });
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -142,15 +144,15 @@ export function Dashboard() {
             className="relative hidden flex-col items-start gap-8 md:flex pt-4"
             x-chunk="dashboard-03-chunk-0"
           >
-            <form className="grid w-full items-start gap-6">
-              <fieldset className="grid">
+            {/* <form className="grid w-full items-start gap-6"> */}
+              <fieldset className="grid w-full items-start gap-6">
                 <legend className="-ml-1 px-1 text-lg font-bold pb-4">
                   Settings
                 </legend>
                 <Separator />
                 <div className="grid gap-3 pt-4 pr-4">
                   <Label htmlFor="model">Goal</Label>
-                  <Select onValueChange={(e)=>setQuestionType(e)}>
+                  <Select onValueChange={(e)=>setQuestionType(e)} defaultValue="answer">
                     <SelectTrigger
                       id="Goal"
                       className="items-start [&_[data-description]]:hidden"
@@ -188,7 +190,7 @@ export function Dashboard() {
                   </Select>
                 </div>
               </fieldset>
-            </form>
+            {/* </form> */}
           </div>
         </main>
       </div>

@@ -7,7 +7,9 @@ import cors from "cors";
 const server = express();
 const PORT = 8080;
 
-server.use(cors())
+server.use(cors({
+  origin: "*",
+}))
 server.use(json())
 
 // server.get("/answer/:id", async (req: Request, res: Response) => {

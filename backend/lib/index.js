@@ -22,35 +22,33 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importStar(require("express"));
 const flows_js_1 = require("./flows.js");
 const flow_1 = require("@genkit-ai/flow");
-const app_1 = require("firebase-admin/app");
-const firestore_1 = require("firebase-admin/firestore");
+const cors_1 = __importDefault(require("cors"));
 const server = (0, express_1.default)();
 const PORT = 8080;
-// Initialize Firebase
-(0, app_1.initializeApp)();
+server.use((0, cors_1.default)({
+    origin: "*",
+}));
 server.use((0, express_1.json)());
-server.get("/answer/:id", async (req, res) => {
-    var _a;
-    const doc = await (0, firestore_1.getFirestore)()
-        .collection("answer")
-        .doc(req.params["id"])
-        .get();
-    const data = (_a = doc.data()) !== null && _a !== void 0 ? _a : {};
-    res.send(data);
-});
-server.post("/answer/:id", async (req, res) => {
-    let llmres = await (0, flow_1.runFlow)(flows_js_1.answer, {
-        chatId: req.params["id"],
-        input: req.body["input"],
-    });
+// server.get("/answer/:id", async (req: Request, res: Response) => {
+//   const doc = await getFirestore()
+//     .collection("answer")
+//     .doc(req.params["id"])
+//     .get();
+//   const data = doc.data() ?? {};
+//   res.send(data);
+// });
+server.post("/answer", async (req, res) => {
+    let llmres = await (0, flow_1.runFlow)(flows_js_1.answer, req.body["input"]);
     res.send(llmres);
 });
 server.post("/draft", async (req, res) => {
-    console.log("cheese");
     let llmres = await (0, flow_1.runFlow)(flows_js_1.draft, req.body["input"]);
     res.send(llmres);
 });
