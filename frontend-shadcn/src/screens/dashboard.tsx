@@ -33,8 +33,49 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
+import { useState } from "react";
+
+interface Chat {
+  user: string;
+  msg: string;
+}
 
 export function Dashboard() {
+  
+  const [currentUserMsg, setCurrentUserMsg] = useState("hello");
+  const [currentAIMsg, setCurrentAIMsg] = useState("");
+  const [questionType, setQuestionType] = useState("");
+  const [chatHistory, setChatHistory] = useState<Chat[]>([{user:"ai", msg: "Hello, how can I help you?"},{user:"human", msg: "Hello, how can I help you?"}]);
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<any>(null);
+  const askAI = async (e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      console.log("questionType", questionType);
+      
+      const response = await fetch(`http://localhost:8080/${questionType}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ currentUserMsg })
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const responseData = await response.json();
+      setCurrentAIMsg(responseData);
+      setChatHistory([...chatHistory, {user:"ai", msg: responseData}]);
+    } catch (error) {
+      setError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   return (
     <div className="grid h-screen w-full">
       <div className="flex flex-col">
@@ -43,7 +84,25 @@ export function Dashboard() {
             <Badge variant="outline" className="absolute right-3 top-3">
               Output
             </Badge>
-            <div className="flex-1" />
+            
+          <div className="flex-1" />
+            {/* <div className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0" style={{backgroundColor:"#333"}}>
+              fgsdgs
+            </div>
+            <div className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0" style={{backgroundColor:"#333"}}>
+              fgsdgs
+            </div> */}
+            {chatHistory && chatHistory.map((chat, index) => {
+              return(
+                chat.user == "ai" ?
+                <div key={chat+index.toString()} className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0">
+                  {chat.msg}
+                </div>
+                :
+                <div key={chat+index.toString()} className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0 content-end">
+                  {chat.msg}
+                </div>
+            )})}
             <form
               className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
               x-chunk="dashboard-03-chunk-1"
@@ -57,7 +116,7 @@ export function Dashboard() {
                 className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
               />
               <div className="flex items-center p-3 pt-0">
-                <TooltipProvider>
+                {/* <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button variant="ghost" size="icon">
@@ -67,8 +126,12 @@ export function Dashboard() {
                     </TooltipTrigger>
                     <TooltipContent side="top">Attach File</TooltipContent>
                   </Tooltip>
-                </TooltipProvider>
-                <Button type="submit" size="sm" className="ml-auto gap-1.5">
+                </TooltipProvider> */}
+                <Button 
+                  // type="submit" 
+                  size="sm" className="ml-auto gap-1.5"
+                  onClick={e=>askAI(e)}  
+                >
                   Send Message
                   <CornerDownLeft className="size-3.5" />
                 </Button>
@@ -87,7 +150,7 @@ export function Dashboard() {
                 <Separator />
                 <div className="grid gap-3 pt-4 pr-4">
                   <Label htmlFor="model">Goal</Label>
-                  <Select>
+                  <Select onValueChange={(e)=>setQuestionType(e)}>
                     <SelectTrigger
                       id="Goal"
                       className="items-start [&_[data-description]]:hidden"
