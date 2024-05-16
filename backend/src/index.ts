@@ -2,10 +2,14 @@ import express, { Request, Response, json } from "express";
 
 import { answer, draft } from "./flows.js";
 import { runFlow } from "@genkit-ai/flow";
+import cors from "cors";
 
 const server = express();
 const PORT = 8080;
 
+server.use(cors({
+  origin: "*",
+}))
 server.use(json())
 
 // server.get("/answer/:id", async (req: Request, res: Response) => {

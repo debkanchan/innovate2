@@ -30,7 +30,6 @@ const flow_1 = require("@genkit-ai/flow");
 const googleai_1 = require("@genkit-ai/googleai");
 const z = __importStar(require("zod"));
 require("dotenv/config");
-const firestore_1 = require("firebase-admin/firestore");
 (0, core_1.configureGenkit)({
     plugins: [(0, googleai_1.googleAI)({ apiVersion: "v1beta" })],
     logLevel: "info",
@@ -38,7 +37,7 @@ const firestore_1 = require("firebase-admin/firestore");
 });
 exports.answer = (0, flow_1.defineFlow)({
     name: "answer",
-    inputSchema: z.object({ chatId: z.string(), input: z.string() }),
+    inputSchema: z.string(),
     outputSchema: z.object({
         text: z.string(),
         references: z.array(z.object({
@@ -47,10 +46,10 @@ exports.answer = (0, flow_1.defineFlow)({
             url: z.string(),
         })),
     }),
-}, async ({ chatId, input }) => {
+}, async (subject) => {
     var _a;
     const llmResponse = await (0, ai_1.generate)({
-        prompt: `You are a helpful assistant to a lawyer. You specialize on Indian laws. The client wants to know ${input}. Provide a text answer along with list of explicit and specific references to the sections of the laws. The text answer should be in details including the exceptions such that there is no room for confusion. Only use data from https://legislative.gov.in and https://indiakanoon.org.`,
+        prompt: `You are a helpful assistant to a lawyer. You specialize on Indian laws. The client wants to know ${subject}. Provide a text answer along with list of explicit and specific references to the sections of the laws. The text answer should be in details including the exceptions such that there is no room for confusion. Only use data from https://legislative.gov.in and https://indiakanoon.org.`,
         model: googleai_1.gemini15Pro,
         config: {
             temperature: 1,
@@ -77,8 +76,6 @@ exports.answer = (0, flow_1.defineFlow)({
             }),
         },
     });
-    const firestore = (0, firestore_1.getFirestore)();
-    await firestore.collection("answer").doc(chatId).set(llmResponse.toHistory());
     return (_a = llmResponse.output()) !== null && _a !== void 0 ? _a : { text: "", references: [] };
 });
 exports.explain = (0, flow_1.defineFlow)({

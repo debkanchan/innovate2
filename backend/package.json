@@ -3,7 +3,7 @@
   "scripts": {
     "start": "node lib/index.js",
     "compile": "tsc",
-    "build": "npm run build:clean && npm run compile",
+    "build": "npm run compile",
     "build:clean": "rm -rf ./lib",
     "build:watch": "tsc --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -20,6 +20,7 @@
     "@genkit-ai/dotprompt": "^0.5.0",
     "@genkit-ai/flow": "^0.5.0",
     "@genkit-ai/googleai": "^0.5.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "firebase-admin": "^12.1.0",
