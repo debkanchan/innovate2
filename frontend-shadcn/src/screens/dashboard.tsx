@@ -2,15 +2,6 @@ import { Bird, CornerDownLeft, Paperclip, Pen, Search } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -20,51 +11,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-import Markdown from 'react-markdown'
-
-interface Source {
-  name: string;
-  section: string;
-  url: string;
-}
+import { Answer } from "@/components/answer";
 
 interface AIMessage {
   text: string;
-  references: Source[];
-}
-
-interface Chat {
-  user: string;
-  msg: string;
-  sources: Source[];
+  references: {
+    name: string;
+    section: string;
+    url: string;
+  }[];
 }
 
 export function Dashboard() {
-  const [currentUserMsg, setCurrentUserMsg] = useState("hello");
-  const [currentAIMsg, setCurrentAIMsg] = useState<AIMessage>({
-    text: "Hello, how may i help you today?",
-    references: [],
-  });
+  const [currentUserMsg, setCurrentUserMsg] = useState("");
+  const [currentAIMsg, setCurrentAIMsg] = useState<AIMessage | null>(null);
   const [questionType, setQuestionType] = useState("answer");
-  const [references, setReferences] = useState("answer");
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<any>(null);
@@ -74,7 +37,6 @@ export function Dashboard() {
     try {
       console.log("questionType", questionType);
       console.log("questionType", questionType);
-      console.log("currentUserMsg", currentUserMsg);
 
       const response = await fetch(`http://localhost:8080/${questionType}`, {
         method: "POST",
@@ -84,12 +46,11 @@ export function Dashboard() {
         body: JSON.stringify({ input: currentUserMsg }),
       });
       if (!response.ok) {
-        console.log("error")
+        console.log("error");
         throw new Error("Network response was not ok");
       }
       const responseData = await response.json();
-      console.log(responseData);
-      setReferences(responseData.references);
+
       setCurrentAIMsg({
         text: responseData.text,
         references: responseData.references,
@@ -110,86 +71,27 @@ export function Dashboard() {
               Output
             </Badge>
 
-            {/* <div className="flex-1" /> */}
-
-            <ScrollArea className="h-screen pt-8 p-3">
-              {currentAIMsg.references.length > 0 ? (
-                <h1 className="text-2xl font-bold mb-3">Answer</h1>
-              ) : (
-                <div></div>
-              )}
-              <div
-                className="min-h-12 resize-none border-0 shadow-none focus-visible:ring-0 leading-loose"
-                // style={{backgroundColor:"#9abcde"}}
-              >
-                {currentAIMsg && currentAIMsg.text}
+            {isLoading ? (
+              <div className="h-screen self-center content-center text-6xl text-slate-300">
+                Trying to answer your query as fast as possible...
               </div>
-              {currentAIMsg.references.length > 0 ? (
-                <h1 className="text-2xl font-bold mb-3 mt-8">Sources</h1>
-              ) : (
-                <div></div>
-              )}
-              {currentAIMsg &&
-                currentAIMsg.references.length > 0 &&
-                currentAIMsg.references.map((source, index) => {
-                  return (
-                    <>
-                      {/* <div
-                            style={{
-                              // backgroundColor:"#9abcde",
-                              padding: "10px",
-                              margin: "0px 10px 10px 0px",
-                              borderRadius: "10px",
-                              border: "1px solid #999",
-                              // maxWidth:"inherit",
-                            }}
-                            className="text-wrap"
-                          >
-                            {source.name}
-                            <br />
-                            Section: {source.section}
-                            <br />
-                            Url: {source.url}
-                          </div> */}
-                      <div>
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="text-md">
-                              {source.name}
-                            </CardTitle>
-                            <CardDescription>{source.section}</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <p>{source.name}</p>
-                          </CardContent>
-                          <CardFooter>
-                            <p>{source.url}</p>
-                          </CardFooter>
-                        </Card>
-                      </div>
-                      <div className="pb-2"></div>
-                    </>
-                  );
-                })}
-              {/* {chatHistory &&
-                chatHistory.map((chat, index) => {
-                  return chat.user == "ai" ? (
-                    <div
-                      key={chat + index.toString()}
-                      className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
-                    >
-                      {chat.msg}
-                    </div>
-                  ) : (
-                    <div
-                      key={chat + index.toString()}
-                      className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0 content-end"
-                    >
-                      {chat.msg}
-                    </div>
-                  );
-                })} */}
-            </ScrollArea>
+            ) : currentAIMsg != null ? (
+              <Answer
+                text={currentAIMsg.text}
+                references={currentAIMsg.references}
+              ></Answer>
+            ) : (
+              <div className="h-screen self-center content-center text-6xl">
+                <p>Hello! 👋</p>
+                <br />
+                <p>
+                  I am <span className="text-emerald-500">LeagleEagle 🦅</span>,
+                  your personal lawyer
+                </p>
+                <br />
+                <p>How may i help you today?</p>
+              </div>
+            )}
 
             <form
               className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
@@ -203,6 +105,7 @@ export function Dashboard() {
                 placeholder="Type your message here..."
                 className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
                 onChange={(e) => setCurrentUserMsg(e.target.value)}
+                disabled={isLoading}
               />
               <div className="flex items-center p-3 pb-10 pt-0">
                 {/* <TooltipProvider>
@@ -221,6 +124,7 @@ export function Dashboard() {
                   size="sm"
                   className="ml-auto gap-1.5"
                   onClick={(e) => askAI(e)}
+                  disabled={isLoading}
                 >
                   Send Message
                   <CornerDownLeft className="size-3.5" />
@@ -232,7 +136,6 @@ export function Dashboard() {
             className="relative hidden flex-col items-start gap-8 md:flex pt-4"
             x-chunk="dashboard-03-chunk-0"
           >
-            {/* <form className="grid w-full items-start gap-6"> */}
             <fieldset className="grid w-full items-start gap-6">
               <legend className="-ml-1 px-1 text-lg font-bold pb-4">
                 Settings
@@ -241,7 +144,10 @@ export function Dashboard() {
               <div className="grid gap-3 pr-4">
                 <Label htmlFor="model">Goal</Label>
                 <Select
-                  onValueChange={(e) => setQuestionType(e)}
+                  onValueChange={(e) => {
+                    setQuestionType(e);
+                    setCurrentAIMsg(null);
+                  }}
                   defaultValue="answer"
                 >
                   <SelectTrigger
