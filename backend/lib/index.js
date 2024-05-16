@@ -23,54 +23,38 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.lawFlow = void 0;
-const ai_1 = require("@genkit-ai/ai");
-const core_1 = require("@genkit-ai/core");
+const express_1 = __importStar(require("express"));
+const flows_js_1 = require("./flows.js");
 const flow_1 = require("@genkit-ai/flow");
-const googleai_1 = require("@genkit-ai/googleai");
-const z = __importStar(require("zod"));
-require("dotenv/config");
-(0, core_1.configureGenkit)({
-    plugins: [(0, googleai_1.googleAI)({ apiVersion: 'v1beta' })],
-    logLevel: "info",
-    enableTracingAndMetrics: true,
-});
-exports.lawFlow = (0, flow_1.defineFlow)({
-    name: "LawFlow",
-    inputSchema: z.string(),
-    outputSchema: z.object({
-        text: z.string(),
-        references: z.array(z.object({
-            name: z.string(),
-            section: z.string(),
-            url: z.string()
-        })),
-    }),
-}, async (subject) => {
+const app_1 = require("firebase-admin/app");
+const firestore_1 = require("firebase-admin/firestore");
+const server = (0, express_1.default)();
+const PORT = 8080;
+// Initialize Firebase
+(0, app_1.initializeApp)();
+server.use((0, express_1.json)());
+server.get("/answer/:id", async (req, res) => {
     var _a;
-    const llmResponse = await (0, ai_1.generate)({
-        prompt: `You are a helpful assistant to a lawyer. You specialize on Indian laws. The client wants to know ${subject}. Provide a text answer along with list of explicit and specific references to the sections of the laws. The text answer should be in details including the exceptions such that there is no room for confusion. Only use data from https://legislative.gov.in and https://indiakanoon.org.`,
-        model: googleai_1.gemini15Pro,
-        config: {
-            temperature: 1,
-            safetySettings: [{
-                    category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-                    threshold: "BLOCK_NONE"
-                }],
-        },
-        output: {
-            format: "json",
-            schema: z.object({
-                text: z.string().describe("the text answer to the query"),
-                references: z.array(z.object({
-                    name: z.string().describe("name of the law"),
-                    section: z.string().describe("the applicable section under the law"),
-                    url: z.string().describe("url to the refence"),
-                })).describe("an array of references to the laws"),
-            }),
-        },
-    });
-    return (_a = llmResponse.output()) !== null && _a !== void 0 ? _a : { "text": "", references: [] };
+    const doc = await (0, firestore_1.getFirestore)()
+        .collection("answer")
+        .doc(req.params["id"])
+        .get();
+    const data = (_a = doc.data()) !== null && _a !== void 0 ? _a : {};
+    res.send(data);
 });
-(0, flow_1.startFlowsServer)();
+server.post("/answer/:id", async (req, res) => {
+    let llmres = await (0, flow_1.runFlow)(flows_js_1.answer, {
+        chatId: req.params["id"],
+        input: req.body["input"],
+    });
+    res.send(llmres);
+});
+server.post("/draft", async (req, res) => {
+    console.log("cheese");
+    let llmres = await (0, flow_1.runFlow)(flows_js_1.draft, req.body["input"]);
+    res.send(llmres);
+});
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 //# sourceMappingURL=index.js.map

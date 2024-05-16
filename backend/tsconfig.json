@@ -1,7 +1,8 @@
 {
   "compileOnSave": true,
   "include": [
-    "src"
+    "src",
+    "touch_grass",
   ],
   "compilerOptions": {
     "module": "commonjs",
