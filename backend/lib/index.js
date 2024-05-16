@@ -36,21 +36,29 @@ server.use((0, cors_1.default)({
     origin: "*",
 }));
 server.use((0, express_1.json)());
-// server.get("/answer/:id", async (req: Request, res: Response) => {
-//   const doc = await getFirestore()
-//     .collection("answer")
-//     .doc(req.params["id"])
-//     .get();
-//   const data = doc.data() ?? {};
-//   res.send(data);
-// });
 server.post("/answer", async (req, res) => {
-    let llmres = await (0, flow_1.runFlow)(flows_js_1.answer, req.body["input"]);
-    res.send(llmres);
+    try {
+        let llmres = await (0, flow_1.runFlow)(flows_js_1.answer, req.body["input"]);
+        res.send(llmres);
+    }
+    catch (e) {
+        console.error(e);
+        res
+            .status(500)
+            .send("Oops! Something went wrong. We could not fulfill your request");
+    }
 });
 server.post("/draft", async (req, res) => {
-    let llmres = await (0, flow_1.runFlow)(flows_js_1.draft, req.body["input"]);
-    res.send(llmres);
+    try {
+        let llmres = await (0, flow_1.runFlow)(flows_js_1.draft, req.body["input"]);
+        res.send(llmres);
+    }
+    catch (e) {
+        console.error(e);
+        res
+            .status(500)
+            .send("Oops! Something went wrong. We could not fulfill your request");
+    }
 });
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

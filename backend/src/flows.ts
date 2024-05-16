@@ -29,7 +29,7 @@ export const answer = defineFlow(
   },
   async (subject) => {
     const llmResponse = await generate({
-      prompt: `You are a helpful assistant to a lawyer. You specialize on Indian laws. The client wants to know ${subject}. Provide a text answer along with list of explicit and specific references to the sections of the laws. The text answer should be in details including the exceptions such that there is no room for confusion. Only use data from https://legislative.gov.in and https://indiakanoon.org.`,
+      prompt: `You are a helpful assistant to a lawyer. You specialize on Indian laws. The client wants to know "${subject}". Provide a text answer along with list of explicit and specific references to the sections of the laws. The text answer should be in details including the exceptions such that there is no room for confusion. Only use data from https://legislative.gov.in and https://indiakanoon.org.`,
       model: gemini15Pro,
       config: {
         temperature: 1,

@@ -7,29 +7,35 @@ import cors from "cors";
 const server = express();
 const PORT = 8080;
 
-server.use(cors({
-  origin: "*",
-}))
-server.use(json())
-
-// server.get("/answer/:id", async (req: Request, res: Response) => {
-//   const doc = await getFirestore()
-//     .collection("answer")
-//     .doc(req.params["id"])
-//     .get();
-
-//   const data = doc.data() ?? {};
-//   res.send(data);
-// });
+server.use(
+  cors({
+    origin: "*",
+  }),
+);
+server.use(json());
 
 server.post("/answer", async (req: Request, res: Response) => {
-  let llmres = await runFlow(answer, req.body["input"]);
-  res.send(llmres);
+  try {
+    let llmres = await runFlow(answer, req.body["input"]);
+    res.send(llmres);
+  } catch (e) {
+    console.error(e);
+    res
+      .status(500)
+      .send("Oops! Something went wrong. We could not fulfill your request");
+  }
 });
 
 server.post("/draft", async (req: Request, res: Response) => {
-  let llmres = await runFlow(draft, req.body["input"]);
-  res.send(llmres);
+  try {
+    let llmres = await runFlow(draft, req.body["input"]);
+    res.send(llmres);
+  } catch (e) {
+    console.error(e);
+    res
+      .status(500)
+      .send("Oops! Something went wrong. We could not fulfill your request");
+  }
 });
 
 server.listen(PORT, () => {
