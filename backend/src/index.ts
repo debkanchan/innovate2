@@ -3,16 +3,17 @@ import { configureGenkit } from "@genkit-ai/core";
 import { defineFlow, startFlowsServer } from "@genkit-ai/flow";
 import { googleAI, geminiPro, gemini15Pro } from "@genkit-ai/googleai";
 import * as z from "zod";
+import "dotenv/config"
 
 configureGenkit({
-  plugins: [googleAI()],
-  logLevel: "debug",
+  plugins: [googleAI({ apiVersion: 'v1beta' })],
+  logLevel: "info",
   enableTracingAndMetrics: true,
 });
 
 export const lawFlow = defineFlow(
   {
-    name: "lawFlow",
+    name: "LawFlow",
     inputSchema: z.string(),
     outputSchema: z.object({
       text: z.string(),
@@ -27,10 +28,14 @@ export const lawFlow = defineFlow(
   },
   async (subject) => {
     const llmResponse = await generate({
-      prompt: `You are a helpful assistant to a lawyer. You specialize on Indian laws. The client wants to know ${subject}. Provide a text answer along with list of explicit and specific references to the sections of the laws. Search for references only from https://indiankanoon.org. The text answer should be in details including the exceptions such that there is no room for confusion.`,
-      model: geminiPro,
+      prompt: `You are a helpful assistant to a lawyer. You specialize on Indian laws. The client wants to know ${subject}. Provide a text answer along with list of explicit and specific references to the sections of the laws. The text answer should be in details including the exceptions such that there is no room for confusion. Only use data from https://legislative.gov.in and https://indiakanoon.org.`,
+      model: gemini15Pro,
       config: {
         temperature: 1,
+        safetySettings: [{
+          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+          threshold: "BLOCK_NONE"
+        }],
       },
       output: {
         format: "json",
@@ -52,4 +57,3 @@ export const lawFlow = defineFlow(
 );
 
 startFlowsServer();
-
