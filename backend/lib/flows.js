@@ -138,7 +138,7 @@ exports.draft = (0, flow_1.defineFlow)({
     outputSchema: z.string(),
 }, async (subject) => {
     const llmResponse = await (0, ai_1.generate)({
-        prompt: `You are a helpful assistant to a lawyer. You specialize on Indian laws. Your job is to draft legal documents according to what the client wants. The client wants you to draft a ${subject}. The draft should be verbose, specific and have no room for confusion. If you need to refence any law, provide explicit and specific references to the sections of the laws which you can get from https://legislative.gov.in. Draft the required document in markdown format.`,
+        prompt: `You are a helpful assistant to a lawyer. You specialize on Indian laws. Your job is to draft legal documents according to what the client wants. The client wants you to draft a ${subject}. The draft should be verbose, specific and have no room for confusion. If you need to refence any law, provide explicit and specific references to the sections of the laws which you can get from https://legislative.gov.in.`,
         model: googleai_1.gemini15Pro,
         config: {
             temperature: 1,

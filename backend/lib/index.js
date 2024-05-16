@@ -51,7 +51,7 @@ server.post("/answer", async (req, res) => {
 server.post("/draft", async (req, res) => {
     try {
         let llmres = await (0, flow_1.runFlow)(flows_js_1.draft, req.body["input"]);
-        res.send(llmres);
+        res.send({ text: llmres, references: [] });
     }
     catch (e) {
         console.error(e);

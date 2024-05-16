@@ -1,10 +1,4 @@
-import {
-  Bird,
-  CornerDownLeft,
-  Paperclip,
-  Pen,
-  Search
-} from "lucide-react";
+import { Bird, CornerDownLeft, Paperclip, Pen, Search } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,7 +29,16 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import Markdown from 'react-markdown'
 
 interface Source {
   name: string;
@@ -51,52 +54,52 @@ interface AIMessage {
 interface Chat {
   user: string;
   msg: string;
-  sources: Source[]
+  sources: Source[];
 }
 
 export function Dashboard() {
-  
   const [currentUserMsg, setCurrentUserMsg] = useState("hello");
-  const [currentAIMsg, setCurrentAIMsg] = useState<AIMessage>({text: "Hello, how may i help you today?", references: []});
+  const [currentAIMsg, setCurrentAIMsg] = useState<AIMessage>({
+    text: "Hello, how may i help you today?",
+    references: [],
+  });
   const [questionType, setQuestionType] = useState("answer");
   const [references, setReferences] = useState("answer");
-  const [chatHistory, setChatHistory] = useState<Chat[]>([
-    {user:"ai", msg: "Hello, how can I help you?", sources:[]},
-    {user:"human", msg: "Hello, how can I help you?", sources:[]},
-  ]);
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<any>(null);
-  const askAI = async (e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const askAI = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
     setIsLoading(true);
     try {
       console.log("questionType", questionType);
       console.log("questionType", questionType);
       console.log("currentUserMsg", currentUserMsg);
-      
+
       const response = await fetch(`http://localhost:8080/${questionType}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ input: currentUserMsg })
+        body: JSON.stringify({ input: currentUserMsg }),
       });
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        console.log("error")
+        throw new Error("Network response was not ok");
       }
       const responseData = await response.json();
-      console.log(responseData)
-      setReferences(responseData.references)
-      setCurrentAIMsg({text: responseData.text, references: responseData.references });
-      setChatHistory([...chatHistory, {user:"ai", msg: responseData.text, sources:[]}]);
+      console.log(responseData);
+      setReferences(responseData.references);
+      setCurrentAIMsg({
+        text: responseData.text,
+        references: responseData.references,
+      });
     } catch (error) {
       setError(error);
     } finally {
       setIsLoading(false);
     }
   };
-
 
   return (
     <div className="grid h-screen w-full">
@@ -106,15 +109,68 @@ export function Dashboard() {
             <Badge variant="outline" className="absolute right-3 top-3">
               Output
             </Badge>
-            
-          {/* <div className="flex-1" /> */}
-            
-            <ScrollArea className="h-screen pt-8">
-              <div className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0 leading-loose" 
+
+            {/* <div className="flex-1" /> */}
+
+            <ScrollArea className="h-screen pt-8 p-3">
+              {currentAIMsg.references.length > 0 ? (
+                <h1 className="text-2xl font-bold mb-3">Answer</h1>
+              ) : (
+                <div></div>
+              )}
+              <div
+                className="min-h-12 resize-none border-0 shadow-none focus-visible:ring-0 leading-loose"
                 // style={{backgroundColor:"#9abcde"}}
               >
                 {currentAIMsg && currentAIMsg.text}
               </div>
+              {currentAIMsg.references.length > 0 ? (
+                <h1 className="text-2xl font-bold mb-3 mt-8">Sources</h1>
+              ) : (
+                <div></div>
+              )}
+              {currentAIMsg &&
+                currentAIMsg.references.length > 0 &&
+                currentAIMsg.references.map((source, index) => {
+                  return (
+                    <>
+                      {/* <div
+                            style={{
+                              // backgroundColor:"#9abcde",
+                              padding: "10px",
+                              margin: "0px 10px 10px 0px",
+                              borderRadius: "10px",
+                              border: "1px solid #999",
+                              // maxWidth:"inherit",
+                            }}
+                            className="text-wrap"
+                          >
+                            {source.name}
+                            <br />
+                            Section: {source.section}
+                            <br />
+                            Url: {source.url}
+                          </div> */}
+                      <div>
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-md">
+                              {source.name}
+                            </CardTitle>
+                            <CardDescription>{source.section}</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <p>{source.name}</p>
+                          </CardContent>
+                          <CardFooter>
+                            <p>{source.url}</p>
+                          </CardFooter>
+                        </Card>
+                      </div>
+                      <div className="pb-2"></div>
+                    </>
+                  );
+                })}
               {/* {chatHistory &&
                 chatHistory.map((chat, index) => {
                   return chat.user == "ai" ? (
@@ -134,7 +190,7 @@ export function Dashboard() {
                   );
                 })} */}
             </ScrollArea>
-            
+
             <form
               className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
               x-chunk="dashboard-03-chunk-1"
@@ -160,10 +216,11 @@ export function Dashboard() {
                     <TooltipContent side="top">Attach File</TooltipContent>
                   </Tooltip>
                 </TooltipProvider> */}
-                <Button 
-                  // type="submit" 
-                  size="sm" className="ml-auto gap-1.5"
-                  onClick={e=>askAI(e)}  
+                <Button
+                  // type="submit"
+                  size="sm"
+                  className="ml-auto gap-1.5"
+                  onClick={(e) => askAI(e)}
                 >
                   Send Message
                   <CornerDownLeft className="size-3.5" />
@@ -176,105 +233,50 @@ export function Dashboard() {
             x-chunk="dashboard-03-chunk-0"
           >
             {/* <form className="grid w-full items-start gap-6"> */}
-              <fieldset className="grid w-full items-start gap-6">
-                <legend className="-ml-1 px-1 text-lg font-bold pb-4">
-                  Settings
-                </legend>
-                <Separator />
-                <div className="grid gap-3 pt-4 pr-4">
-                  <Label htmlFor="model">Goal</Label>
-                  <Select onValueChange={(e)=>setQuestionType(e)} defaultValue="answer">
-                    <SelectTrigger
-                      id="Goal"
-                      className="items-start [&_[data-description]]:hidden"
-                    >
-                      <SelectValue placeholder="Select a Goal" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="answer">
-                        <div className="flex items-start gap-3 text-muted-foreground">
-                          <Search className="size-5" />
-                          <div className="grid gap-0.5">
-                            <p className="font-medium text-foreground">
-                              Answer
-                            </p>
-                            <p className="text-xs" data-description>
-                              Answer any question with references.
-                            </p>
-                          </div>
+            <fieldset className="grid w-full items-start gap-6">
+              <legend className="-ml-1 px-1 text-lg font-bold pb-4">
+                Settings
+              </legend>
+              <Separator />
+              <div className="grid gap-3 pr-4">
+                <Label htmlFor="model">Goal</Label>
+                <Select
+                  onValueChange={(e) => setQuestionType(e)}
+                  defaultValue="answer"
+                >
+                  <SelectTrigger
+                    id="Goal"
+                    className="items-start [&_[data-description]]:hidden"
+                  >
+                    <SelectValue placeholder="Select a Goal" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="answer">
+                      <div className="flex items-start gap-3 text-muted-foreground">
+                        <Search className="size-5" />
+                        <div className="grid gap-0.5">
+                          <p className="font-medium text-foreground">Answer</p>
+                          <p className="text-xs" data-description>
+                            Answer any question with references.
+                          </p>
                         </div>
-                      </SelectItem>
-                      <SelectItem value="draft">
-                        <div className="flex items-start gap-3 text-muted-foreground">
-                          <Pen className="size-5" />
-                          <div className="grid gap-0.5">
-                            <p className="font-medium text-foreground">
-                              Draft
-                            </p>
-                            <p className="text-xs" data-description>
-                              Draft legal documents.
-                            </p>
-                          </div>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="draft">
+                      <div className="flex items-start gap-3 text-muted-foreground">
+                        <Pen className="size-5" />
+                        <div className="grid gap-0.5">
+                          <p className="font-medium text-foreground">Draft</p>
+                          <p className="text-xs" data-description>
+                            Draft legal documents.
+                          </p>
                         </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Separator />
-
-                <div className="grid gap-3 pr-4">
-                  <legend className="-ml-1 px-1 text-lg font-bold pb-4">
-                    Sources
-                  </legend>
-                  <ScrollArea>
-                    {currentAIMsg && currentAIMsg.references.length > 0 && currentAIMsg.references.map((source, index) => {
-                      return (<>
-                        <div style={{
-                          // backgroundColor:"#9abcde",
-                          padding:"10px",
-                          margin:"0px 10px 10px 0px",
-                          borderRadius:"10px",
-                          border:"1px solid #999",
-                          // maxWidth:"inherit",
-                        }}>
-                          {source.name}
-                          <br/>
-                          Section: {source.section}
-                          <br/>
-                          Url: {source.url}
-                        </div>
-                        {/* <Card className="inline-block w-auto">
-                          <CardHeader>
-                            <CardTitle className="text-md">{source.name}</CardTitle>
-                            <CardDescription>{source.section}</CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <p>{source.name}</p>
-                          </CardContent>
-                          <CardFooter>
-                            <p>{source.url}</p>
-                          </CardFooter>
-                        </Card> */}
-                      </>
-                    )})}
-                  </ScrollArea>
-                </div>
-
-                {/* {[0,1,2].map((source, index) => {
-                return (<>
-                  <div style={{
-                    // backgroundColor:"#9abcde",
-                    padding:"10px",
-                    margin:"0px 20px 0px 0px",
-                    borderRadius:"10px",
-                    border:"1px solid #333"
-                  }}>{source}</div>
-                </>)
-              })} */}
-              </fieldset>
-            {/* </form> */}
-
-            
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </fieldset>
           </div>
         </main>
       </div>
