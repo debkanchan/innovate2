@@ -23,10 +23,6 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "firebase-admin": "^12.1.0",
-    "remark-docx": "^0.1.6",
-    "remark-parse": "^11.0.0",
-    "unified": "^11.0.4",
     "zod": "^3.23.8"
   },
   "devDependencies": {

@@ -1,9 +1,18 @@
 import React from "react";
 import { ScrollArea } from "./ui/scroll-area";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import Markdown from "react-markdown";
+import { Separator } from "./ui/separator";
 
 interface AnswerProps {
+  message: string
   text: string;
   references: {
     name: string;
@@ -13,31 +22,33 @@ interface AnswerProps {
 }
 
 export const Answer: React.FC<AnswerProps> = (props) => {
-  const { text, references } = props;
+  const { message, text, references } = props;
 
   return (
     <ScrollArea className="h-screen pt-8 p-3">
-      {references.length > 0 ? (
-        <h1 className="text-2xl font-bold mb-3">Answer</h1>
-      ) : (
-        <div></div>
-      )}
+      {/* <h1 className="text-2xl font-bold mb-3">Question</h1> */}
+      <div
+        className="mb-3"
+      >
+        <h1 className="text-2xl underline decoration-emerald-600 font-bold mb-3">Question</h1>
+        <p className="text-xl">{message}</p>
+      </div>
+      <h1 className="text-2xl font-bold mb-3 mt-8 underline decoration-emerald-600">Answer</h1>
       <div
         className="min-h-12 resize-none border-0 shadow-none focus-visible:ring-0 leading-loose"
         // style={{backgroundColor:"#9abcde"}}
       >
         <Markdown>{text}</Markdown>
-        
       </div>
       {references.length > 0 ? (
-        <h1 className="text-2xl font-bold mb-3 mt-8">Sources</h1>
+        <h1 className="text-2xl font-bold mb-3 mt-8 underline decoration-emerald-600">Sources</h1>
       ) : (
         <div></div>
       )}
       {references.length > 0 &&
         references.map((source, index) => {
           return (
-            <React.Fragment key={source.name+index}>
+            <React.Fragment key={source.name + index}>
               {/* <div
                             style={{
                               // backgroundColor:"#9abcde",
