@@ -25,17 +25,19 @@ interface AIMessage {
 }
 
 export function Dashboard() {
+  const [currentUserMsgOnTextArea, setCurrentUserMsgOnTextArea] = useState("");
   const [currentUserMsg, setCurrentUserMsg] = useState("");
   const [currentAIMsg, setCurrentAIMsg] = useState<AIMessage | null>(null);
   const [questionType, setQuestionType] = useState("answer");
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<any>(null);
+  const [errorMsg, setErrorMsg] = useState("");
   const askAI = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
+    setCurrentUserMsgOnTextArea("");
     setIsLoading(true);
     try {
-      console.log("questionType", questionType);
       console.log("questionType", questionType);
 
       const response = await fetch(`http://localhost:8080/${questionType}`, {
@@ -47,6 +49,8 @@ export function Dashboard() {
       });
       if (!response.ok) {
         console.log("error");
+        setErrorMsg("Oops! Something went wrong. Please try again")
+        setCurrentAIMsg({text:"", references: []});
         throw new Error("Network response was not ok");
       }
       const responseData = await response.json();
@@ -57,6 +61,8 @@ export function Dashboard() {
       });
     } catch (error) {
       setError(error);
+      setErrorMsg("Oops! Something went wrong. Please try again")
+      setCurrentAIMsg({text:"", references: []});
     } finally {
       setIsLoading(false);
     }
@@ -75,11 +81,21 @@ export function Dashboard() {
               <div className="h-screen self-center content-center text-6xl text-slate-300">
                 Trying to answer your query as fast as possible...
               </div>
-            ) : currentAIMsg != null ? (
-              <Answer
-                text={currentAIMsg.text}
-                references={currentAIMsg.references}
-              ></Answer>
+            ) : currentAIMsg != null && currentAIMsg.text.length>0  ? (
+              <>
+                <h1 className="text-2xl font-bold mb-3 ml-3">Question</h1>
+                <div
+                  className="min-h-12 resize-none border-0 shadow-none focus-visible:ring-0 py-2.5 px-4 ml-3"
+                  style={{ backgroundColor: "#def", borderRadius: 5 }}
+                >
+                  {currentUserMsg.length>0 && currentUserMsg}
+                </div>
+                
+                <Answer
+                  text={currentAIMsg.text}
+                  references={currentAIMsg.references}
+                ></Answer>
+              </>
             ) : (
               <div className="h-screen self-center content-center text-6xl">
                 <p>Hello! 👋</p>
@@ -90,6 +106,18 @@ export function Dashboard() {
                 </p>
                 <br />
                 <p>How may i help you today?</p>
+                {errorMsg && errorMsg.length > 0 ? (
+                  <>
+                    <div
+                      className="min-h-12 resize-none border-0 shadow-none focus-visible:ring-0 leading-loose mt-16"
+                      style={{ color: "#f55", borderRadius: 5 }}
+                    >
+                      {errorMsg}
+                    </div>
+                  </>
+                ) : (
+                  <></>
+                )}
               </div>
             )}
 
@@ -104,7 +132,11 @@ export function Dashboard() {
                 id="message"
                 placeholder="Type your message here..."
                 className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
-                onChange={(e) => setCurrentUserMsg(e.target.value)}
+                onChange={(e) => {
+                  setCurrentUserMsgOnTextArea(e.target.value);
+                  setCurrentUserMsg(e.target.value);
+                }}
+                value={currentUserMsgOnTextArea}
                 disabled={isLoading}
               />
               <div className="flex items-center p-3 pb-10 pt-0">

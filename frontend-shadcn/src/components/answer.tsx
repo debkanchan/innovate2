@@ -37,7 +37,7 @@ export const Answer: React.FC<AnswerProps> = (props) => {
       {references.length > 0 &&
         references.map((source, index) => {
           return (
-            <>
+            <React.Fragment key={source.name+index}>
               {/* <div
                             style={{
                               // backgroundColor:"#9abcde",
@@ -70,7 +70,7 @@ export const Answer: React.FC<AnswerProps> = (props) => {
                 </Card>
               </div>
               <div className="pb-2"></div>
-            </>
+            </React.Fragment>
           );
         })}
     </ScrollArea>
